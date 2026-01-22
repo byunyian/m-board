@@ -242,8 +242,11 @@ export const todayProducts = [
     { 
         id: 307,
         title: "[주문폭주] (포근기모/말랑쫀득/신축성최고) 티에브 기모 스트라이프 밴딩 롱 스커트", 
-        price: "13,660", originalPrice: "29,000", discount: "53%", 
-        img: "https://atimg.sonyunara.com/files/attrangs/goods/169073/list1_696ef7c6346e6.gif",
-        reviews: 8, buyCount: 44
+        price: "13,660", 
+        originalPrice: "29,000", 
+        discount: "53%", 
+        img: "https://atimg.sonyunara.com/files/attrangs/goods/169079/list13_696fae09d5243.gif",
+        reviews: 8, 
+        buyCount: 44
     },
 ];

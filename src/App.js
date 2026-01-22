@@ -8,6 +8,8 @@ import MainBanner from './MainBanner'; // (기존 배너)
 import ProductList from './ProductList';
 import ProductDetail from './ProductDetail';
 import Footer from './Footer';       // (기존 푸터)
+import Cart from './Cart';
+
 
 // 데이터 가져오기 (Best, Winter, New, Today 다 가져오기!)
 import { bestProducts, winterProducts, newItemProducts, todayProducts } from './data';
@@ -52,6 +54,8 @@ function App() {
         {/* 2. 상세 페이지 (여기가 핵심!! 👉 /:id 를 꼭 붙여야 함) */}
         {/* :id는 "여기에 아무 숫자나 들어올 수 있다"는 뜻이야 */}
         <Route path="/detail/:id" element={<ProductDetail />} />
+
+        <Route path="/cart" element={<Cart />} />
 
       </Routes>
       

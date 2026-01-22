@@ -1,89 +1,61 @@
-import React, { useState, useEffect } from "react";
-import { BiSearch, BiUser, BiHeart, BiShoppingBag } from "react-icons/bi";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { BiSearch, BiUser, BiShoppingBag, BiHeart } from "react-icons/bi";
+
+// 1. 네가 만든 NavMenu 부품과 데이터 가져오기!
 import NavMenu, { MENU_DATA } from './NavMenu';
-// 👇 1. useLocation 가져오기 (이미 있음)
-import { useLocation } from 'react-router-dom'; 
 
-function Header() {
-    // 👇 2. 현재 주소가 '/detail'로 시작하는지 확인!
-    const location = useLocation();
-    // startsWith를 써서 /detail/0, /detail/1 모두 포함되게 함
-    const isDetail = location.pathname.startsWith('/detail'); 
-
+export default function Header() {
+    // 2. 어떤 메뉴에 마우스가 올라갔는지 기억하는 상태 (State)
     const [activeMenu, setActiveMenu] = useState(null);
-    const [scrollY, setScrollY] = useState(0);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrollY(window.scrollY);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-
-    const topPosition = Math.max(0, 40 - scrollY);
-
-    // 🎨 배경색 규칙
-    let backgroundColor;
-    if (scrollY > 0) {
-        backgroundColor = 'rgba(255, 255, 255, 0.8)'; // 스크롤 내리면 반투명
-    } else if (isDetail) {
-        backgroundColor = 'white'; // 💥 [수정] 상세 페이지 맨 위는 무조건 흰색 배경!
-    } else {
-        backgroundColor = 'transparent'; // 메인 맨 위는 투명
-    }
-
-    // 🎨 글씨 색깔 규칙
-    // 💥 [수정] 상세 페이지(isDetail)이거나 스크롤을 내렸으면 무조건 검은색!
-    // 아닐 때(메인 맨 위)만 흰색!
-    const textColor = (isDetail || scrollY > 0) ? '#333' : 'white';
 
     return (
-        <header style={{
-            position: 'fixed',
-            left: 0, right: 0, zIndex: 100,
-            top: topPosition,
-            
-            backgroundColor: backgroundColor,
-            backdropFilter: scrollY > 0 ? 'blur(10px)' : 'none',
-            boxShadow: scrollY > 0 ? '0 4px 6px rgba(0,0,0,0.1)' : 'none',
-            
-            transition: 'background-color 0.3s ease', 
-            
-            padding: '20px 40px',
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            boxSizing: 'border-box',
-            color: textColor 
+        <header style={{ 
+            fontFamily: '"Pretendard", sans-serif', 
+            borderBottom: '1px solid #eee', 
+            backgroundColor: 'white',
+            position: 'sticky', 
+            top: 0, 
+            zIndex: 1000,
+            width: '100%' 
         }}>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
-                <h1 style={{ margin: 0, fontSize: '24px' }}>
-                    <a href="/" style={{ color: textColor, textDecoration: 'none', fontFamily: 'serif' }}>  
-                        ATTRANGS
-                    </a>
-                </h1>
+            {/* 최상단 배너 */}
+            <div style={{ backgroundColor: '#a87e6f', color: 'white', textAlign: 'center', fontSize: '11px', padding: '6px 0', fontWeight: 'bold' }}>
+                오늘 밤 9시까지 주문하면 오/늘/출/발! 🚚
+            </div>
 
-                <nav style={{ display: 'flex', gap: '20px', fontSize: '14px', fontWeight: 'bold' }}>
+            {/* 메인 헤더 영역 */}
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                
+                {/* 1. 로고 */}
+                <div style={{ fontSize: '24px', fontWeight: 'bold', letterSpacing: '2px', marginRight: '40px' }}>
+                    <Link to="/" style={{ textDecoration: 'none', color: '#333' }}>ATTRANGS</Link>
+                </div>
+
+                {/* 2. 메뉴 리스트 (여기서 NavMenu를 사용!) */}
+                <nav style={{ flex: 1, display: 'flex', gap: '30px', fontSize: '14px', fontWeight: '700', height: '100%' }}>
+                    {/* MENU_DATA를 돌면서 NavMenu 부품을 하나씩 찍어내기 */}
                     {MENU_DATA.map((menu) => (
                         <NavMenu 
-                            key={menu.id}
-                            menu={menu}
-                            isActive={activeMenu === menu.id}
-                            setActiveMenu={setActiveMenu}
-                            textColor={textColor} 
+                            key={menu.id} 
+                            menu={menu} 
+                            isActive={activeMenu === menu.id} // "지금 마우스가 나한테 있니?"
+                            setActiveMenu={setActiveMenu}     // "마우스 들어오면 알려줘!"
                         />
                     ))}
                 </nav>
-            </div>
 
-            <div style={{ display: 'flex', gap: '20px', fontSize: '24px', color: textColor }}>
-                <BiSearch style={{ cursor: 'pointer' }} />
-                <BiUser style={{ cursor: 'pointer' }} />
-                <BiHeart style={{ cursor: 'pointer' }} />
-                <BiShoppingBag style={{ cursor: 'pointer' }} />
+                {/* 3. 우측 아이콘 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', fontSize: '22px', color: '#333' }}>
+                    <BiSearch style={{ cursor: 'pointer' }} />
+                    <BiUser style={{ cursor: 'pointer' }} />
+                    <Link to="/cart" style={{ color: '#333', display: 'flex' }}>
+                        <BiShoppingBag style={{ cursor: 'pointer' }} />
+                    </Link>
+                    <BiHeart style={{ cursor: 'pointer' }} />
+                    <span style={{ fontSize: '11px', marginLeft: '5px', cursor: 'pointer', fontWeight: 'normal' }}>로그인</span>
+                </div>
             </div>
         </header>
     );
 }
-
-export default Header;
