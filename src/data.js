@@ -3,7 +3,7 @@
 // 1. BEST 신상품 (id: 0 ~ )
 export const bestProducts = [
     { 
-        id: 0,
+        id: test,
         title: "(보들니트소재/레이어드한듯♥) 키브 버튼 배색 레이어드 후드 가디건", 
         price: "19,180", 
         originalPrice: "35,000", 
