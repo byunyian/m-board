@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { bestProducts, winterProducts, newItemProducts, todayProducts } from './data';
 
-import { BiHeart, BiChevronRight, BiChevronLeft, BiChevronDown, BiGift, BiCopy, BiShareAlt, BiRefresh } from "react-icons/bi";
+import { 
+    BiHeart, BiChevronRight, BiChevronLeft, BiChevronDown, BiChevronUp, 
+    BiCopy, BiShareAlt, BiRefresh, BiGift, BiShoppingBag, BiHelpCircle 
+} from "react-icons/bi";
 import { AiFillHeart, AiOutlineMessage } from "react-icons/ai"; 
-import { RiKakaoTalkFill } from "react-icons/ri";
+import { FaTruck } from "react-icons/fa";
 
 export default function ProductDetail() {
     
@@ -14,7 +17,15 @@ export default function ProductDetail() {
     const allProducts = [...bestProducts, ...winterProducts, ...newItemProducts, ...todayProducts];
     const targetProduct = allProducts.find((item) => item.id == id);
 
-    // 2. 기본 템플릿 데이터
+    // 날짜 자동 계산
+    const today = new Date();
+    today.setDate(today.getDate() + 1); 
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const date = today.getDate().toString().padStart(2, '0');
+    const day = ['일', '월', '화', '수', '목', '금', '토'][today.getDay()];
+    const dateText = `${month}월 ${date}일 ${day}요일 도착`;
+
+    // 2. 기본 데이터 (화면 구성을 위한 더미 데이터)
     const defaultData = {
         title: "상품 정보 로딩 중...",
         price: "0",
@@ -26,34 +37,30 @@ export default function ProductDetail() {
             "https://atimg.sonyunara.com/files/attrangs/goods/167463/68e8c8563e290.jpg",
             "https://via.placeholder.com/100x100/e0e0e0/999?text=Add5",
         ],
-        options: [
-            { id: 1, name: '기본컬러(OneSize)', img: 'https://via.placeholder.com/100' },
-            { id: 2, name: 'Pink(긴팔)', img: 'https://via.placeholder.com/600x800/ffb6c1/fff?text=Pink+Image' },
-            { id: 3, name: 'Ivory(긴팔)', img: 'https://via.placeholder.com/600x800/fffff0/ccc?text=Ivory+Image' },
-            { id: 4, name: 'Beige(긴팔)', img: 'https://via.placeholder.com/600x800/f5f5dc/ccc?text=Beige+Image' },
-            { id: 5, name: 'Black(긴팔)', img: 'https://via.placeholder.com/600x800/000000/fff?text=Black+Image' },
-            { id: 6, name: 'Brown(긴팔)', img: 'https://via.placeholder.com/600x800/a52a2a/fff?text=Brown+Image' },
+        optionsColors: [
+            { id: 1, name: 'SkyBlue(긴팔)(model)', img: 'https://via.placeholder.com/400x500/87CEEB/ffffff?text=SkyBlue' },
+            { id: 2, name: 'Pink(긴팔)(model)', img: 'https://via.placeholder.com/400x500/FFB6C1/ffffff?text=Pink' },
+            { id: 3, name: 'Ivory(긴팔)', img: 'https://via.placeholder.com/400x500/FFFFF0/cccccc?text=Ivory' },
+            { id: 4, name: 'Beige(긴팔)', img: 'https://via.placeholder.com/400x500/F5F5DC/cccccc?text=Beige' },
+            { id: 5, name: 'Black(긴팔)', img: 'https://via.placeholder.com/400x500/000000/ffffff?text=Black' },
+            { id: 6, name: 'Brown(긴팔)', img: 'https://via.placeholder.com/400x500/A52A2A/ffffff?text=Brown' },
+            { id: 7, name: 'White(긴팔)', img: 'https://via.placeholder.com/400x500/FFFFFF/cccccc?text=White' },
         ],
-        // 가로 스크롤용 리얼 후기 데이터
+        optionsSizes: [
+            { id: 's1', name: 'Free', badge: true },
+            { id: 's2', name: 'L + 4,000', badge: false },
+        ],
         reviews: [
             { id: 1, user: '에이블리 **', img: 'https://via.placeholder.com/150', score: 5, text: 'E컵 여성 돼지입니다 결혼식룩에 대박 찰떡이었고...', option: 'Free / Charcoal(긴팔)(model)', tag: '색상-잘맞아요' },
             { id: 2, user: '지그재그 **', img: 'https://via.placeholder.com/150', score: 5, text: '옷에 살짝 운 자국?이 있지만...소재도 좋고...', option: 'Pink(긴팔)(model) / Free', tag: '색상-비슷해요' },
-            { id: 3, user: '지그재그 **', img: 'https://via.placeholder.com/150', score: 5, text: '친구 결혼식 가려고 새로 샀어용...', option: 'Pink(긴팔)(model) / Free', tag: '색상-어두워요' },
-            { id: 4, user: '지그재그 **', img: 'https://via.placeholder.com/150', score: 5, text: '사진에 보이는대로 시스루라 밝은색 이너...', option: 'Ivory(긴팔) / Free', tag: '색상-비슷해요' },
         ],
         relatedProducts: [
             { id: 991, title: '(실물극찬/고급미) 브이넥 펄 타이 블라우스', price: '39,000원', original: '65,000원', discount: '40%', img: 'https://via.placeholder.com/300x400/333/fff?text=Blouse' },
             { id: 992, title: '[울함유] 모던 램스울 크롭 라운드 니트', price: '22,900원', original: '30,000원', discount: '24%', img: 'https://via.placeholder.com/300x400/d8bfd8/fff?text=Knit' },
-            { id: 993, title: '올리비아 모직 히든밴딩 기모 슬랙스', price: '35,500원', original: '45,000원', discount: '21%', img: 'https://via.placeholder.com/300x400/333/fff?text=Slacks' },
-            { id: 994, title: '홀린 브러쉬 배색 스트라이프 카라넥 니트', price: '32,500원', original: '50,000원', discount: '35%', img: 'https://via.placeholder.com/300x400/a52a2a/fff?text=Stripe+Knit' },
         ],
         reviewQueens: [
             { id: 1, img: 'https://via.placeholder.com/300x300/e0e0e0/333?text=Review+1', text: '[용기모안감/겨울내내따뜻♥]', count: 26, score: 5 },
-            { id: 2, img: 'https://via.placeholder.com/300x300/d0d0d0/333?text=Review+2', text: '[단독벨트추가!/바지안감]', count: 71, score: 5 },
-            { id: 3, img: 'https://via.placeholder.com/300x300/c0c0c0/333?text=Review+3', text: '[울함유/MADE/영롱뽀송]', count: 53, score: 4.9 },
-            { id: 4, img: 'https://via.placeholder.com/300x300/b0b0b0/333?text=Review+4', text: '[기모버전 출시!] 플로브', count: 362, score: 5 },
         ],
-        // 상세 리뷰 리스트 데이터
         detailedReviews: [
             {
                 id: 1,
@@ -62,47 +69,55 @@ export default function ProductDetail() {
                 score: 5,
                 option1: 'Charcoal(model)', match1: '똑같아요',
                 option2: 'Free', match2: '잘맞아요',
-                text: '소매가 긴편이라 제일 미운 윗부분 팔살 노출도 안되니 좋습니다 ~~!!!! 비침이 있는 편이라 그런지 목 부분에 리본으로 묶어도 크게 답답한 느낌은 안 들더라구요 ㅎㅎ 딱 기념일, 가족행사, 하객룩으로 좋은 디자인으로 나왔어여 가격대비 퀄 좋아유',
-                images: ['https://via.placeholder.com/100', 'https://via.placeholder.com/100', 'https://via.placeholder.com/100'],
+                text: '소매가 긴편이라 제일 미운 윗부분 팔살 노출도 안되니 좋습니다 ~~!!!!',
+                images: ['https://via.placeholder.com/100'],
                 helpful: 2,
                 comments: 1
             }
         ]
     };
 
+    // ✨ [에러 해결 핵심] ✨
+    // targetProduct의 데이터 중 reviews, options 등이 있어도 무시하고, defaultData의 배열을 우선 사용하도록 설정!
     const product = targetProduct ? {
-        ...defaultData,        
-        ...targetProduct,      
-        reviews: defaultData.reviews, // 배열 유지
-        detailedReviews: defaultData.detailedReviews
+        ...defaultData,
+        ...targetProduct, // 여기서 기존 데이터가 덮어써지지만...
+        
+        // 👇 아래 항목들은 무조건 defaultData(배열)를 쓰겠다고 강제 지정!
+        reviews: defaultData.reviews, 
+        relatedProducts: defaultData.relatedProducts,
+        reviewQueens: defaultData.reviewQueens,
+        detailedReviews: defaultData.detailedReviews,
+        optionsColors: defaultData.optionsColors,
+        optionsSizes: defaultData.optionsSizes
     } : defaultData;
 
-    // 사진 연동 로직
     if (targetProduct) {
         product.additionalImages = [targetProduct.img, ...defaultData.additionalImages.slice(1)];
-        product.options[0].img = targetProduct.img;
-        product.options[0].name = "기본컬러 (Selected)";
     }
 
     const [mainImg, setMainImg] = useState(product.img || product.additionalImages[0]);
-    const [selectedOption, setSelectedOption] = useState(product.options[0]);
+    const [selectedColor, setSelectedColor] = useState(null);
+    const [selectedSize, setSelectedSize] = useState(null);
     const [quantity, setQuantity] = useState(1);
     
-    // 탭 메뉴 설정
+    // 아코디언 상태
+    const [isCouponOpen, setIsCouponOpen] = useState(false);
+    const [isCareOpen, setIsCareOpen] = useState(false);
+    const [isSizeInfoOpen, setIsSizeInfoOpen] = useState(false);
+
     const tabs = [
         { name: '상품정보', count: null },
         { name: '디테일', count: null },
         { name: '관련상품', count: null },
-        { name: '구매후기', count: 136, active: true }, // 구매후기 활성화
+        { name: '구매후기', count: 136, active: true },
         { name: '상품문의', count: 15 },
         { name: '쇼핑가이드', count: null },
     ];
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        if(targetProduct) {
-            setMainImg(targetProduct.img);
-        }
+        if(targetProduct) setMainImg(targetProduct.img);
     }, [targetProduct]);
 
     const handleQuantity = (type) => {
@@ -110,92 +125,253 @@ export default function ProductDetail() {
         else if(type === 'minus' && quantity > 1) setQuantity(quantity - 1);
     };
 
-    const handleOptionClick = (option) => {
-        setSelectedOption(option); 
-        setMainImg(option.img);     
+    const handleColorClick = (colorName, colorImg) => {
+        setSelectedColor(colorName);
+        setMainImg(colorImg);
     };
 
-    if (!targetProduct) return <div style={{padding:'100px', textAlign:'center', fontSize:'20px'}}>상품을 찾을 수 없습니다. 😢</div>;
+    const priceNumber = parseInt(String(product.price).replace(/[^0-9]/g, '')) || 0;
+    const totalPrice = (selectedColor && selectedSize) ? priceNumber * quantity : 0; 
+
+    if (!targetProduct) return <div style={{padding:'100px', textAlign:'center'}}>상품을 찾을 수 없습니다.</div>;
 
     return (
         <div style={{ fontFamily: '"Pretendard", sans-serif', color: '#333' }}>
             
-            {/* ================================================== */}
             {/* 1. 상단 상품 상세 정보 */}
-            {/* ================================================== */}
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '160px 20px 50px' }}>
-                <div style={{ display: 'flex', gap: '50px', alignItems: 'flex-start', marginBottom: '80px' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '60px 20px 50px' }}>
+                <div style={{ display: 'flex', gap: '60px', alignItems: 'flex-start', marginBottom: '80px' }}>
+                    
+                    {/* 왼쪽 이미지 */}
                     <div style={{ width: '500px', flexShrink: 0 }}>
-                        <img src={mainImg} alt="Main" style={{ width: '100%', borderRadius: '4px', marginBottom: '10px' }} />
+                        <img src={mainImg} alt="Main" style={{ width: '100%', borderRadius: '0', marginBottom: '10px' }} />
                         <div style={{ display: 'flex', gap: '8px', overflow: 'auto' }}>
                             {product.additionalImages.map((imgUrl, index) => (
-                                <img key={index} src={imgUrl} alt="thumb" onClick={() => setMainImg(imgUrl)} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px', cursor: 'pointer', border: mainImg === imgUrl ? '2px solid #333' : '1px solid #eee' }} />
+                                <img key={index} src={imgUrl} alt="thumb" onClick={() => setMainImg(imgUrl)} style={{ width: '60px', height: '60px', objectFit: 'cover', cursor: 'pointer', border: mainImg === imgUrl ? '2px solid #333' : '1px solid #eee' }} />
                             ))}
                         </div>
                     </div>
+
+                    {/* 오른쪽 정보 영역 */}
                     <div style={{ flex: 1 }}>
-                        <div style={{ marginBottom: '20px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                                <div style={{ fontSize: '13px', color: '#666', display: 'flex', alignItems: 'center', gap: '5px' }}>상품번호 : {product.id} <BiCopy style={{ cursor: 'pointer' }} /></div>
-                                <button style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1px solid #e5e5e5', backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', color: '#666', fontSize: '20px' }}><BiShareAlt /></button>
-                            </div>
-                            <h2 style={{ fontSize: '22px', margin: '0 0 15px 0', fontWeight: 'normal', lineHeight: '1.4', wordBreak: 'keep-all' }}>{product.title}</h2>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                    <span style={{ fontSize: '11px', color: '#a87e6f', border: '1px solid #e8dcd6', padding: '4px 8px', borderRadius: '2px', backgroundColor: '#fff' }}>쿠폰할인</span>
-                                    <span style={{ fontSize: '11px', color: '#a87e6f', border: '1px solid #e8dcd6', padding: '4px 8px', borderRadius: '2px', backgroundColor: '#fff' }}>부분오늘출발</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '14px', marginBottom: '5px' }}>
-                                    <AiFillHeart style={{ color: '#a87e6f' }} /> <span style={{ fontWeight: 'bold' }}>4.8</span><span style={{ color: '#999', textDecoration: 'underline', cursor: 'pointer' }}>리뷰 135</span>
-                                </div>
+                        
+                        {/* 상단 정보 */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', color: '#888', fontSize: '12px' }}>
+                            <div>상품번호 : {product.id} <BiCopy style={{ cursor: 'pointer', verticalAlign: 'middle', marginLeft:'4px' }}/></div>
+                            <BiShareAlt style={{ fontSize: '20px', cursor: 'pointer', border:'1px solid #ddd', borderRadius:'50%', padding:'5px' }}/>
+                        </div>
+
+                        <h2 style={{ fontSize: '22px', margin: '0 0 15px 0', fontWeight: 'bold', lineHeight: '1.4', wordBreak: 'keep-all', color: '#333' }}>
+                            {product.title}
+                        </h2>
+
+                        <div style={{ display: 'flex', gap: '5px', marginBottom: '20px' }}>
+                            {['쿠폰할인', '부분오늘출발', '1+1할인', '사이즈교환무료'].map((tag, i) => (
+                                <span key={i} style={{ fontSize: '11px', color: i < 2 ? '#a87e6f' : '#888', backgroundColor: i < 2 ? '#f5ebe7' : '#f5f5f5', padding: '4px 8px' }}>{tag}</span>
+                            ))}
+                            <div style={{ marginLeft: 'auto', fontSize: '12px', color: '#333', fontWeight: 'bold' }}>
+                                ♥ 4.8 <span style={{ textDecoration: 'underline', color: '#888', fontWeight: 'normal' }}>리뷰 136</span>
                             </div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #eee', paddingBottom: '25px', marginBottom: '25px' }}>
+
+                        {/* 가격 & 쿠폰 */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid #333', paddingBottom: '20px', marginBottom: '10px' }}>
                             <div>
-                                <div style={{ fontSize: '26px', fontWeight: 'bold', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    {product.originalPrice && <span style={{ textDecoration: 'line-through', color: '#bbb', fontSize: '16px', fontWeight: 'normal' }}>{product.originalPrice}</span>}
-                                    <span>{product.price}원</span>
-                                    <span style={{ color: '#ff5454' }}>{product.discount}</span>
+                                <div style={{ textDecoration: 'line-through', color: '#bbb', fontSize: '14px', marginBottom: '5px' }}>{product.originalPrice}</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{product.price}원</span>
+                                    <span style={{ color: '#ff5454', fontSize: '24px', fontWeight: 'bold' }}>{product.discount}</span>
                                 </div>
-                                <div style={{ fontSize: '13px', color: '#ff5454', fontWeight: '600' }}>총 18,500원 할인 <span style={{ color: '#999', fontWeight: 'normal' }}>- 할인특가 15 : 18 : 35 남았습니다</span></div>
+                                <div style={{ fontSize: '12px', color: '#ff5454', marginTop: '5px' }}>총 18,500원 할인 <span style={{ color: '#aaa' }}>- 할인특가 09 : 57 : 24 남았습니다</span></div>
                             </div>
-                            <div style={{ border: '1px solid #a87e6f', borderRadius: '4px', color: '#a87e6f', padding: '10px 15px', fontSize: '13px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: '1.2' }}>
-                                <span style={{ fontSize: '10px' }}>COUPON</span><span style={{ fontWeight: 'bold' }}>내 쿠폰함 <BiChevronRight style={{ verticalAlign: '-1px' }}/></span>
-                            </div>
-                        </div>
-                        <div style={{ backgroundColor: '#f9f9f9', padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: '#555', marginBottom: '20px' }}>
-                            <span>쿠폰 사용 시 최대 할인 금액 <span style={{ fontSize: '11px', border: '1px solid #ddd', borderRadius: '50%', padding: '0 4px' }}>?</span></span>
-                            <div><span style={{ fontWeight: 'bold', marginRight: '5px' }}>51%</span><span style={{ fontWeight: 'bold', fontSize: '16px', color: '#333' }}>30,700원</span><BiChevronDown style={{ verticalAlign: 'middle', marginLeft: '5px' }} /></div>
-                        </div>
-                        <div style={{ marginBottom: '20px' }}>
-                            <div style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '10px' }}>옵션 <span style={{ fontWeight: 'normal', marginLeft: '10px', color: '#a87e6f' }}>{selectedOption.name}</span></div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px' }}>
-                                {product.options.map((option) => (
-                                    <img key={option.id} src={option.img} alt={option.name} onClick={() => handleOptionClick(option)} style={{ width: '55px', height: '70px', objectFit: 'cover', borderRadius: '3px', cursor: 'pointer', border: selectedOption.id === option.id ? '2px solid #a87e6f' : '1px solid #eee', boxSizing: 'border-box' }} />
-                                ))}
+                            <div style={{ border: '1px solid #a87e6f', borderRadius: '4px', padding: '8px 15px', textAlign: 'center', cursor: 'pointer', color: '#a87e6f' }}>
+                                <div style={{ fontSize: '10px' }}>COUPON</div>
+                                <div style={{ fontSize: '13px', fontWeight: 'bold' }}>내 쿠폰함 &gt;</div>
                             </div>
                         </div>
-                        <div style={{ backgroundColor: '#f7f7f7', padding: '15px', marginBottom: '20px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div style={{ display: 'flex', border: '1px solid #ddd', backgroundColor: 'white' }}>
-                                    <button onClick={() => handleQuantity('minus')} style={{ width: '30px', height: '30px', border: 'none', background: 'transparent', cursor: 'pointer' }}>-</button>
-                                    <div style={{ width: '30px', height: '30px', lineHeight: '30px', textAlign: 'center', fontSize: '13px', borderLeft: '1px solid #eee', borderRight: '1px solid #eee' }}>{quantity}</div>
-                                    <button onClick={() => handleQuantity('plus')} style={{ width: '30px', height: '30px', border: 'none', background: 'transparent', cursor: 'pointer' }}>+</button>
+
+                        {/* 쿠폰 아코디언 */}
+                        <div onClick={() => setIsCouponOpen(!isCouponOpen)} style={{ backgroundColor: '#f9f9f9', padding: '15px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: '#666', marginBottom: '20px', cursor: 'pointer' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <span>쿠폰 사용 시 최대 할인 금액</span> <BiHelpCircle style={{ fontSize: '16px', color: '#bbb' }} /> 
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <span style={{ color: '#333', fontWeight: 'bold' }}>51% 30,700원</span>
+                                {isCouponOpen ? <BiChevronUp style={{ fontSize: '18px' }}/> : <BiChevronDown style={{ fontSize: '18px' }}/>}
+                            </div>
+                        </div>
+
+                        {/* 혜택/배송 정보 */}
+                        <div style={{ fontSize: '13px', color: '#666', lineHeight: '2.4', marginBottom: '30px' }}>
+                            <div style={{ display: 'flex' }}><div style={{ width: '90px', color: '#333' }}>카드혜택</div><div>무이자 혜택</div></div>
+                            <div style={{ display: 'flex' }}><div style={{ width: '90px', color: '#333' }}>멤버십혜택</div><div>등급별혜택보기</div></div>
+                            <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                                <div style={{ width: '90px', color: '#333', marginTop:'3px' }}>배송예상</div>
+                                <div>
+                                    <span style={{ textDecoration: 'underline', color:'#333' }}>부분 오늘출발 가능</span><br/>
+                                    <span style={{ color: '#a87e6f', fontWeight: 'bold' }}>{dateText}</span>
+                                    <span style={{ color: '#999', fontSize: '12px' }}> - 오후 9시 이전 주문 시 ⓘ</span>
                                 </div>
-                                <span style={{ fontWeight: 'bold', fontSize: '14px' }}>{(parseInt(String(product.price).replace(/[^0-9]/g, '')) * quantity).toLocaleString()}원</span>
                             </div>
                         </div>
-                        <button style={{ width: '100%', padding: '15px', border: '1px solid #eee', background: '#f9f9f9', color: '#666', fontSize: '13px', marginBottom: '20px', cursor: 'pointer' }}>코디상품 한번에 구매하기 +</button>
-                        <div style={{ display: 'flex', gap: '5px', marginBottom: '30px' }}>
-                            <button style={{ flex: 2, height: '50px', border: 'none', background: '#a87e6f', fontSize: '16px', fontWeight: 'bold', color: 'white', cursor: 'pointer' }}>구매하기</button>
+
+                        {/* 배너들 */}
+                        <div style={{ backgroundColor: '#a87e6f', color: 'white', padding: '12px', textAlign: 'center', fontSize: '13px', fontWeight: 'bold', marginBottom: '10px', cursor: 'pointer' }}>
+                            💬 아뜨랑스 카카오 채널 추가 시 3,000원 할인 쿠폰 지급 &gt;
                         </div>
+                        <div style={{ padding: '12px', textAlign: 'center', fontSize: '12px', color: '#666', marginBottom: '10px', border: '1px solid #eee', cursor: 'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'5px' }}>
+                            <span style={{ color: '#888' }}>⌄</span> 오늘출발 상품만 보기
+                        </div>
+                        <div style={{ backgroundColor: '#fdf5f5', padding: '15px', textAlign: 'center', fontSize: '13px', color: '#d68b8b', border: '1px solid #f8e0e0', marginBottom: '30px' }}>
+                            1+1 할인♡ 2장 구매시 2,000원 추가할인
+                        </div>
+
+                        {/* 옵션 선택 */}
+                        <div style={{ marginBottom: '30px' }}>
+                            {/* 색상 */}
+                            <div style={{ display: 'flex', marginBottom: '20px' }}>
+                                <div style={{ width: '60px', paddingTop: '5px', fontSize: '13px', color: '#333', fontWeight:'bold' }}>옵션</div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '13px', marginBottom: '10px', color: selectedColor ? '#333' : '#aaa', fontWeight: selectedColor ? 'bold' : 'normal' }}>
+                                        {selectedColor || "옵션을 선택해주세요"}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                        {product.optionsColors.map((opt) => (
+                                            <div key={opt.id} onClick={() => handleColorClick(opt.name, opt.img)}
+                                                style={{ 
+                                                    width: '50px', height: '50px', 
+                                                    border: selectedColor === opt.name ? '2px solid #333' : '1px solid #eee', 
+                                                    cursor: 'pointer', borderRadius: '4px', overflow: 'hidden'
+                                                }} title={opt.name}>
+                                                <img src={opt.img} alt={opt.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 사이즈 */}
+                            <div style={{ display: 'flex', marginBottom: '20px' }}>
+                                <div style={{ width: '60px', paddingTop: '10px', fontSize: '13px', color: '#333', fontWeight:'bold' }}>사이즈</div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '13px', marginBottom: '10px', color: '#aaa' }}>
+                                        {selectedColor ? "사이즈를 선택해주세요" : "색상을 먼저 선택해 주세요"}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        {product.optionsSizes.map((size) => (
+                                            <button key={size.id} onClick={() => setSelectedSize(size.name)} disabled={!selectedColor}
+                                                style={{ 
+                                                    padding: '10px 15px', 
+                                                    border: selectedSize === size.name ? '1px solid #333' : '1px solid #eee', 
+                                                    backgroundColor: 'white', color: selectedSize === size.name ? '#333' : (selectedColor ? '#666' : '#eee'),
+                                                    cursor: selectedColor ? 'pointer' : 'default', fontSize: '12px', borderRadius: '4px',
+                                                    display: 'flex', alignItems: 'center', gap: '5px'
+                                                }}>
+                                                {size.badge && <FaTruck style={{color: '#a87e6f'}} />} {size.name}
+                                                {size.badge && <span style={{color: '#a87e6f', fontSize:'11px'}}>[오늘출발]</span>}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 사이즈 버튼 */}
+                            <div style={{ paddingLeft: '60px', display: 'flex', gap: '5px', marginBottom: '30px' }}>
+                                <button style={{ flex: 1, padding: '12px', border: '1px solid #eee', backgroundColor: '#fafafa', fontSize: '12px', color: '#666', cursor:'pointer' }}>내 사이즈 찾기</button>
+                                <button style={{ flex: 1, padding: '12px', border: '1px solid #eee', backgroundColor: '#fafafa', fontSize: '12px', color: '#666', cursor:'pointer' }}>사이즈 추가요청</button>
+                            </div>
+
+                            {/* 선택된 옵션 박스 */}
+                            {(selectedColor && selectedSize) && (
+                                <div style={{ backgroundColor: '#f9f9f9', padding: '20px', marginBottom: '20px', position: 'relative' }}>
+                                    <div style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '10px' }}>{product.title}</div>
+                                    <div style={{ fontSize: '12px', color: '#666', marginBottom: '15px' }}>- {selectedColor} / {selectedSize}</div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', border: '1px solid #ddd', backgroundColor: 'white' }}>
+                                            <button onClick={() => handleQuantity('minus')} style={{ width: '25px', height: '25px', border: 'none', background: 'transparent', cursor: 'pointer' }}>-</button>
+                                            <div style={{ width: '35px', height: '25px', lineHeight: '25px', textAlign: 'center', fontSize: '12px', borderLeft: '1px solid #eee', borderRight: '1px solid #eee' }}>{quantity}</div>
+                                            <button onClick={() => handleQuantity('plus')} style={{ width: '25px', height: '25px', border: 'none', background: 'transparent', cursor: 'pointer' }}>+</button>
+                                        </div>
+                                        <div style={{ fontWeight: 'bold' }}>{totalPrice.toLocaleString()}원</div>
+                                    </div>
+                                    <button onClick={() => {setSelectedColor(null); setSelectedSize(null); setQuantity(1);}} style={{ position: 'absolute', top: '10px', right: '10px', border: 'none', background: 'none', cursor: 'pointer', fontSize:'16px', color:'#999' }}>✕</button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* 총 금액 */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderTop: '1px solid #333', paddingTop: '20px' }}>
+                            <div style={{ width: '60px', fontSize: '14px', color: '#333', fontWeight: 'bold' }}>총금액</div>
+                            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#333' }}>{totalPrice.toLocaleString()}<span style={{fontSize:'16px'}}>원</span></div>
+                        </div>
+
+                        <button style={{ width: '100%', padding: '15px', backgroundColor: '#f5f5f5', border: 'none', fontSize: '13px', color: '#333', marginBottom: '20px', cursor: 'pointer' }}>
+                            코디상품 한번에 구매하기 +
+                        </button>
+
+                        {/* 하단 버튼 */}
+                        <div style={{ display: 'flex', gap: '0', marginBottom: '15px', height: '60px' }}>
+                            <div style={{ width: '60px', border: '1px solid #ccc', borderRight: 'none', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', color: '#666' }}>
+                                <BiHeart style={{ fontSize: '20px', marginBottom: '2px' }}/> <span style={{ fontSize: '11px' }}>1,942</span>
+                            </div>
+                            <div style={{ width: '60px', border: '1px solid #ccc', borderRight: 'none', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', color: '#666' }}>
+                                <BiGift style={{ fontSize: '20px', marginBottom: '2px' }}/> <span style={{ fontSize: '11px' }}>선물하기</span>
+                            </div>
+                            <Link to="/cart" style={{ flex: 1, textDecoration: 'none' }}>
+                                <button style={{ width: '100%', height: '100%', border: '1px solid #ccc', backgroundColor: '#f5f5f5', fontSize: '15px', color: '#333', cursor: 'pointer', borderRight: 'none' }}>
+                                    장바구니
+                                </button>
+                            </Link>
+                            <button style={{ flex: 1, height: '100%', border: 'none', backgroundColor: '#a87e6f', fontSize: '16px', fontWeight: 'bold', color: 'white', cursor: 'pointer', position: 'relative' }}>
+                                구매하기
+                                <div style={{ position: 'absolute', top: '-32px', right: '0', backgroundColor: '#ffeb3b', padding: '6px 10px', borderRadius: '20px', fontSize: '11px', color: '#333', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '3px', boxShadow:'0 2px 5px rgba(0,0,0,0.1)' }}>
+                                    <span style={{ fontWeight: '900', fontSize:'12px' }}>N</span> pay 결제기능
+                                    <div style={{position:'absolute', bottom:'-4px', right:'15px', width:'8px', height:'8px', background:'#ffeb3b', transform:'rotate(45deg)'}}></div>
+                                </div>
+                            </button>
+                        </div>
+
+                        {/* 네이버 페이 */}
+                        <div style={{ border: '1px solid #ddd', padding: '15px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ textAlign: 'left', marginRight:'10px' }}>
+                                <div style={{ color: '#00c73c', fontWeight: '900', fontSize: '14px', marginBottom: '2px' }}>NAVER</div>
+                                <div style={{ fontSize: '10px', color: '#888', lineHeight:'1.2' }}>네이버ID로 간편구매<br/>네이버페이</div>
+                            </div>
+                            <button style={{ flex: 1, height: '45px', border: '1px solid #00c73c', backgroundColor: 'white', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                                <span style={{ color: '#00c73c', fontWeight: '900', fontSize:'22px' }}>N</span> pay 구매
+                            </button>
+                            <div style={{ display: 'flex', gap: '5px', marginLeft:'10px' }}>
+                                <button style={{ width: '40px', height: '45px', border: '1px solid #ddd', backgroundColor: 'white', fontSize: '12px', color: '#666', cursor:'pointer' }}>찜</button>
+                                <button style={{ width: '40px', height: '45px', border: '1px solid #ddd', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor:'pointer' }}>
+                                    <span style={{ fontWeight: 'bold', fontSize: '13px', color: '#333' }}>N</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div style={{ marginTop: '10px', fontSize: '12px', color: '#666', display: 'flex', justifyContent: 'space-between', alignItems:'center' }}>
+                            <div><span style={{ color: '#00c73c', fontWeight: 'bold' }}>이벤트</span> 최대 10% 추가적립 혜택</div>
+                            <div style={{ border: '1px solid #eee', display: 'flex' }}><button style={{ border: 'none', background: 'white', padding: '2px 6px', cursor:'pointer' }}>&lt;</button><button style={{ border: 'none', background: 'white', padding: '2px 6px', cursor:'pointer', borderLeft:'1px solid #eee' }}>&gt;</button></div>
+                        </div>
+
+                        <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '30px 0' }} />
+
+                        {/* 하단 드롭다운 (관리팁 / 사이즈정보) */}
+                        <div onClick={() => setIsCareOpen(!isCareOpen)} style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 0', cursor: 'pointer', borderBottom: '1px solid #eee' }}>
+                            <div style={{ fontSize: '13px', color: '#333', fontWeight: 'bold' }}>관리 팁 <span style={{ fontWeight: 'normal', color: '#888', marginLeft: '10px' }}>텐셀(79%) 폴리,폴리에스터(21%)</span></div>
+                            <BiChevronRight style={{ color: '#ccc', fontSize: '20px', transform: isCareOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+                        </div>
+                        {isCareOpen && <div style={{ padding: '15px', backgroundColor: '#f9f9f9', fontSize: '12px', color: '#666' }}>드라이크리닝을 권장합니다.</div>}
+
+                        <div onClick={() => setIsSizeInfoOpen(!isSizeInfoOpen)} style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 0', cursor: 'pointer', borderBottom: '1px solid #eee' }}>
+                            <div style={{ fontSize: '13px', color: '#333', fontWeight: 'bold' }}>모델,상품 사이즈 정보</div>
+                            <BiChevronRight style={{ color: '#ccc', fontSize: '20px', transform: isSizeInfoOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+                        </div>
+                        {isSizeInfoOpen && <div style={{ padding: '15px', backgroundColor: '#f9f9f9', fontSize: '12px', color: '#666' }}>모델 키 168cm, 상의 55사이즈 착용.</div>}
+
                     </div>
                 </div>
             </div>
 
-            {/* ================================================== */}
-            {/* 2. 리얼 후기 (아뜨랑스 스타일 가로 스크롤) */}
-            {/* ================================================== */}
+            {/* 2. 리얼 후기 */}
             <div style={{ textAlign: 'center', marginBottom: '80px', padding: '0 20px' }}>
                 <h3 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '10px' }}>아뜨랑스 리얼후기</h3>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', marginBottom: '20px', color: '#a87e6f', fontWeight: 'bold', fontSize: '14px' }}>
@@ -225,9 +401,7 @@ export default function ProductDetail() {
                 </div>
             </div>
 
-            {/* ================================================== */}
             {/* 3. 함께 많이 본 상품 */}
-            {/* ================================================== */}
             <div style={{ textAlign: 'center', marginBottom: '80px', padding: '0 20px', paddingBottom: '30px' }}>
                 <h3 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '30px' }}>함께 많이 본 상품</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent:'center' }}>
@@ -250,9 +424,7 @@ export default function ProductDetail() {
                 </div>
             </div>
 
-            {/* ================================================== */}
-            {/* [NEW] 탭 메뉴 (Tab Bar) - 사진 속 디자인 적용 */}
-            {/* ================================================== */}
+            {/* 탭 메뉴 */}
             <div style={{ maxWidth: '1200px', margin: '0 auto 60px', border: '1px solid #eee', borderBottom: '1px solid #a87e6f' }}>
                 <ul style={{ display: 'flex', margin: 0, padding: 0, listStyle: 'none' }}>
                     {tabs.map((tab, i) => (
@@ -273,9 +445,7 @@ export default function ProductDetail() {
                 </ul>
             </div>
 
-            {/* ================================================== */}
             {/* 4. 이번주 리뷰퀸 섹션 */}
-            {/* ================================================== */}
             <div style={{ backgroundColor: '#faf9f7', padding: '80px 0 100px', textAlign: 'center' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
                     <div style={{ marginBottom: '40px' }}>
@@ -296,11 +466,8 @@ export default function ProductDetail() {
                 </div>
             </div>
 
-            {/* ================================================== */}
             {/* 5. 상세 구매후기 & 평점 섹션 */}
-            {/* ================================================== */}
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '100px 20px' }}>
-                
                 {/* (1) 상단 통계 & 필터 영역 */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '50px' }}>
                     <div style={{ flex: 1, textAlign: 'center', borderRight: '1px solid #eee' }}>
